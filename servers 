@@ -1,0 +1,38 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+mongoose.connect('mongodb://localhost:27017/simpleauth');
+
+const User = mongoose.model('User', new mongoose.Schema({
+  username: String,
+  password: String,
+}));
+
+app.post('/signup', async (req, res) => {
+  const { username, password } = req.body;
+  const exists = await User.findOne({ username });
+  if (exists) return res.send('User already exists');
+
+  await User.create({ username, password });
+  res.send('Signup successful');
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username, password });
+  if (!user) return res.send('Login failed');
+
+  res.send('Login successful');
+});
+
+app.listen(5000, () => console.log('Server running on http://localhost:5000'));
+
+
+
+npm init -y
+npm install express mongoose cors
